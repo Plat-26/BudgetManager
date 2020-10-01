@@ -1,11 +1,50 @@
 package budget;
 import  java.util.Scanner;
+import java.util.ArrayList;
 
 
 public class Main {
     public static void main(String[] args) {
 
         chooseAction();
+    }
+
+
+    static void chooseAction() {
+        Control control = new Control();
+        Scanner scanner = new Scanner(System.in);
+
+        showMenu();
+        int x = scanner.nextInt();
+        System.out.println();
+        switch (x) {
+            case 1:
+                control.setIncome();
+
+                chooseAction();
+                break;
+            case 2:
+                Purchase purchase = new Purchase();
+                control.addPurchase(purchase);
+                System.out.println("Purchase was added\n");
+                chooseAction();
+                break;
+            case 3:
+                System.out.println(control.showPurchases());
+                System.out.println();
+                chooseAction();
+                break;
+            case 4:
+                System.out.println(control.getIncome());
+                System.out.println();
+                chooseAction();
+                break;
+            case 0:
+                control.exit();
+                break;
+            default:
+                chooseAction();
+        }
     }
 
     static void showMenu() {
@@ -16,95 +55,80 @@ public class Main {
         System.out.println("0) Exit");
     }
 
-    static void chooseAction() {
-        Purchase purchase = new Purchase();
-        Income income = new Income();
-        Scanner scanner = new Scanner(System.in);
-
-        showMenu();
-        int x = scanner.nextInt();
-        System.out.println();
-        switch (x) {
-            case 1:
-                income.addIncome();
-                System.out.println();
-                chooseAction();
-                break;
-            case 2:
-                System.out.println(purchase.addPurchase());
-                System.out.println();
-                chooseAction();
-                break;
-            case 3:
-                System.out.println(purchase.getList());
-                System.out.println();
-                chooseAction();
-                break;
-            case 4:
-                System.out.println(income.getBalance());
-                System.out.println();
-                chooseAction();
-                break;
-            case 0:
-                exit();
-                break;
-            default:
-                chooseAction();
-        }
-    }
-
-    static void exit() {
-        System.out.println("Bye!");
-    }
 }
 
-class Income {
 
-    static double balance;
+class Purchase {
 
-    void addIncome() {
+    Double value;
+    String title;
+
+    public Purchase() {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Enter Income");
-        balance += scanner.nextDouble();
-        System.out.println("Income was added");
+        System.out.println("\nEnter purchase name:");
+        setTitle(scanner.nextLine());
+        System.out.println("Enter its price:");
+        setValue(Double.parseDouble(scanner.nextLine()));
     }
 
-    String getBalance() {
-       return "Balance: $" + balance;
+    public Double getValue() {
+        return value;
     }
 
-    public void setBalance(Double price) {
-        balance -= price;
+    public void setValue(Double value) {
+        this.value = value;
     }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
 }
 
-class Purchase extends Income {
+class Control {
 
-    private double sum;
-    static StringBuilder list = new StringBuilder();
+    static ArrayList<Purchase> purchases = new ArrayList<>();
+    static double sumOfPurchases = 0.0;
+    static double income = 0.0;
 
-    String getList() {
-        if(!(list.toString()).isEmpty()) {
-            return list.toString() + "Total sum: $" + sum + "\n";
+    void addPurchase(Purchase p) { //get list input from console
+        purchases.add(p);
+        sumOfPurchases += p.getValue();
+        updateIncome(p.getValue());
+    }
+
+
+    String showPurchases() {
+        if(!purchases.isEmpty()) {
+            for (Purchase p : purchases) {
+                System.out.println(p.getTitle() + " $" + p.getValue());
+            }
+            return ("Total sum: $" + sumOfPurchases);
         }
         return "Purchase list is empty";
     }
 
-    private void calculateSum(String line) { //calculate total dollars on list
-        sum += Double.parseDouble(line.substring(line.indexOf("$") + 1));
+    private void updateIncome(double value) { //calculate total dollars on list
+        this.income -= value;
     }
 
-    public String addPurchase() { //get list input from console
+    void setIncome() {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Enter purchase name:");
-            list.append(scanner.nextLine());
-            System.out.println("Enter its price:");
-            String price = scanner.nextLine();
-            list.append(" $" + price + "\n");
-            calculateSum(price);
-            new Income().setBalance(Double.parseDouble(price));
-
-        return "Purchase was added";
+        System.out.println("\nEnter Income");
+        this.income += Double.parseDouble(scanner.nextLine());
+        System.out.println("Income was added\n");
     }
 
+    String getIncome() {
+        return "Balance: $" + income;
+    }
+
+    void exit() {
+        System.out.println("Bye!");
+    }
 }
+
