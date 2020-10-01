@@ -17,28 +17,31 @@ public class Main {
     }
 
     static void chooseAction() {
+        Purchase purchase = new Purchase();
+        Income income = new Income();
         Scanner scanner = new Scanner(System.in);
+
         showMenu();
         int x = scanner.nextInt();
         System.out.println();
         switch (x) {
             case 1:
-                Income.addIncome();
+                income.addIncome();
                 System.out.println();
                 chooseAction();
                 break;
             case 2:
-                System.out.println(Purchase.addPurchase());
+                System.out.println(purchase.addPurchase());
                 System.out.println();
                 chooseAction();
                 break;
             case 3:
-                System.out.println(Purchase.getList());
+                System.out.println(purchase.getList());
                 System.out.println();
                 chooseAction();
                 break;
             case 4:
-                System.out.println(Income.getBalance());
+                System.out.println(income.getBalance());
                 System.out.println();
                 chooseAction();
                 break;
@@ -59,39 +62,39 @@ class Income {
 
     static double balance;
 
-    static void addIncome() {
+    void addIncome() {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Enter Income");
         balance += scanner.nextDouble();
         System.out.println("Income was added");
     }
 
-    static String getBalance() {
+    String getBalance() {
        return "Balance: $" + balance;
     }
 
-    static void updateBalance(Double price) {
+    public void setBalance(Double price) {
         balance -= price;
     }
 }
 
-class Purchase {
+class Purchase extends Income {
 
-    private static double sum;
+    private double sum;
     static StringBuilder list = new StringBuilder();
 
-    static String getList() {
+    String getList() {
         if(!(list.toString()).isEmpty()) {
             return list.toString() + "Total sum: $" + sum + "\n";
         }
         return "Purchase list is empty";
     }
 
-    private static void calculateSum(String line) { //calculate total dollars on list
+    private void calculateSum(String line) { //calculate total dollars on list
         sum += Double.parseDouble(line.substring(line.indexOf("$") + 1));
     }
 
-    public static String addPurchase() { //get list input from console
+    public String addPurchase() { //get list input from console
         Scanner scanner = new Scanner(System.in);
         System.out.println("Enter purchase name:");
             list.append(scanner.nextLine());
@@ -99,10 +102,9 @@ class Purchase {
             String price = scanner.nextLine();
             list.append(" $" + price + "\n");
             calculateSum(price);
-            Income.updateBalance(Double.parseDouble(price));
+            new Income().setBalance(Double.parseDouble(price));
 
         return "Purchase was added";
     }
 
 }
-
