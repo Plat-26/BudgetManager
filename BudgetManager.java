@@ -1,6 +1,8 @@
 package budget;
 import  java.util.Scanner;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 
 
 public class Main {
@@ -24,13 +26,11 @@ public class Main {
                 chooseAction();
                 break;
             case 2:
-                Purchase purchase = new Purchase();
-                control.addPurchase(purchase);
-                System.out.println("Purchase was added\n");
+                control.addPurchase();
                 chooseAction();
                 break;
             case 3:
-                System.out.println(control.showPurchases());
+                control.showPurchases();
                 System.out.println();
                 chooseAction();
                 break;
@@ -87,29 +87,132 @@ class Purchase {
         this.title = title;
     }
 
-}
-
-class Control {
-
-    static ArrayList<Purchase> purchases = new ArrayList<>();
-    static double sumOfPurchases = 0.0;
-    static double income = 0.0;
-
-    void addPurchase(Purchase p) { //get list input from console
-        purchases.add(p);
-        sumOfPurchases += p.getValue();
-        updateIncome(p.getValue());
+    public static String purchasesToAdd() {
+        return "Choose the type of purchase\n" +
+                "1) Food\n" +
+                "2) Clothes\n" +
+                "3) Entertainment\n" +
+                "4) Other\n" +
+                "5) Back";
     }
 
 
-    String showPurchases() {
-        if(!purchases.isEmpty()) {
-            for (Purchase p : purchases) {
-                System.out.println(p.getTitle() + " $" + p.getValue());
-            }
-            return ("Total sum: $" + sumOfPurchases);
+
+
+}
+
+class Control extends Purchase{
+
+//    static ArrayList<Purchase> purchases = new ArrayList<>();
+//    static double sumOfPurchases = 0.0;
+    static double income = 0.0;
+
+
+    Purchase nextPurchase () {
+        Purchase purchase = new Purchase();
+        return purchase;
+    }
+    static Scanner scanner = new Scanner(System.in);
+
+    static HashMap<Integer, HashSet<Purchase>> expenses = new HashMap<>();
+
+    static void populateMap() {
+        expenses.put(1, null); //create map set values to null
+        expenses.put(2, null);
+        expenses.put(3, null);
+        expenses.put(4, null);
+    }
+
+    void addValues(int key) {
+        expenses.get(key).add(nextPurchase());
+    }
+
+    void addPurchase() { //get list input from console
+        System.out.println(purchasesToAdd());
+        int type = scanner.nextInt();
+        switch (type) {
+            case 1: case 2: case 3: case 4:
+                addValues(type);
+                break;
+            case 5:
+                return;
+            default:
+                addPurchase();
+                break;
+
         }
-        return "Purchase list is empty";
+        System.out.println("Purchase was added\n");
+        addPurchase();
+//        sumOfPurchases += p.getValue();
+//        updateIncome(p.getValue());
+    }
+
+    void showValues(int key) {
+        double sum = 0.0;
+        if (expenses.get(key).isEmpty()) {
+            System.out.println("Purchase List is Empty");
+            return;
+        }
+        for (var item : expenses.get(key)) {
+            sum += item.getValue();
+            System.out.println(item.getTitle() + ":" + item.getValue());
+        }
+        System.out.println("Total Sum : $" + sum );
+    }
+
+    void showAllValues() {
+        double sum = 0.0;
+        for (int i = 0; i < 4; i++) {
+            if (!expenses.get(i).isEmpty()) {
+                for (var item : expenses.get(i)) {
+                    sum += item.getValue();
+                    System.out.println(item.getTitle() + ":" + item.getValue());
+                }
+            }
+            System.out.println("Total Sum : $" + sum );
+        }
+    }
+    String purchasesToShow () {
+        return "Choose the type of purchases\n" +
+                "1) Food\n" +
+                "2) Clothes\n" +
+                "3) Entertainment\n" +
+                "4) Other\n" +
+                "5) All\n" +
+                "6) Back\n";
+    }
+    void showPurchases() {
+        System.out.println(purchasesToShow());
+        int type = scanner.nextInt();
+        switch (type) {
+            case 1 :
+                System.out.println("Food");
+                showValues(type);
+                break;
+            case 2:
+                System.out.println("Clothes");
+                showValues(type);
+                break;
+            case 3:
+                System.out.println("Entertainment");
+                showValues(type);
+                break;
+            case 4:
+                System.out.println("Other");
+                showValues(type);
+                break;
+            case 5:
+                System.out.println("All");
+                showAllValues();
+                break;
+            case 6:
+                return;
+            default:
+                showPurchases();
+                break;
+
+        }
+        showPurchases();
     }
 
     private void updateIncome(double value) { //calculate total dollars on list
