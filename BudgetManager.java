@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 
+
 public class Main {
     public static void main(String[] args) {
 
@@ -14,6 +15,7 @@ public class Main {
 
     static void chooseAction() {
         Control control = new Control();
+//        control.populateMap();
         Scanner scanner = new Scanner(System.in);
 
         showMenu();
@@ -22,12 +24,14 @@ public class Main {
         switch (x) {
             case 1:
                 control.setIncome();
-
+                System.out.println();
                 chooseAction();
                 break;
             case 2:
                 control.addPurchase();
+                System.out.println();
                 chooseAction();
+
                 break;
             case 3:
                 control.showPurchases();
@@ -48,6 +52,7 @@ public class Main {
     }
 
     static void showMenu() {
+        System.out.println("Choose your action");
         System.out.println("1) Add income");
         System.out.println("2) Add purchase");
         System.out.println("3) Show list of purchases");
@@ -95,13 +100,9 @@ class Purchase {
                 "4) Other\n" +
                 "5) Back";
     }
-
-
-
-
 }
 
-class Control extends Purchase{
+class Control {
 
 //    static ArrayList<Purchase> purchases = new ArrayList<>();
 //    static double sumOfPurchases = 0.0;
@@ -116,19 +117,27 @@ class Control extends Purchase{
 
     static HashMap<Integer, HashSet<Purchase>> expenses = new HashMap<>();
 
+
+
     static void populateMap() {
-        expenses.put(1, null); //create map set values to null
-        expenses.put(2, null);
-        expenses.put(3, null);
-        expenses.put(4, null);
+        expenses.put(1, new HashSet<>()); //create map set values to null
+        expenses.put(2, new HashSet<>());
+        expenses.put(3, new HashSet<>());
+        expenses.put(4, new HashSet<>());
     }
 
     void addValues(int key) {
-        expenses.get(key).add(nextPurchase());
+        try {
+            expenses.computeIfAbsent(key, k -> new HashSet<>()).add(nextPurchase());
+            //expenses.get(key).add(nextPurchase());
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
+
     }
 
     void addPurchase() { //get list input from console
-        System.out.println(purchasesToAdd());
+        System.out.println(Purchase.purchasesToAdd());
         int type = scanner.nextInt();
         switch (type) {
             case 1: case 2: case 3: case 4:
@@ -162,15 +171,21 @@ class Control extends Purchase{
 
     void showAllValues() {
         double sum = 0.0;
-        for (int i = 0; i < 4; i++) {
-            if (!expenses.get(i).isEmpty()) {
-                for (var item : expenses.get(i)) {
-                    sum += item.getValue();
-                    System.out.println(item.getTitle() + ":" + item.getValue());
+        try{
+            for (int i = 1; i < 5; i++) {
+                if (!expenses.get(i).isEmpty()) {
+                    for (var item : expenses.get(i)) {
+                        sum += item.getValue();
+                        System.out.println(item.getTitle() + ":" + item.getValue());
+                    }
                 }
+                System.out.println("Total Sum : $" + sum );
             }
-            System.out.println("Total Sum : $" + sum );
+
+        } catch (Exception ex) {
+            ex.getMessage();
         }
+
     }
     String purchasesToShow () {
         return "Choose the type of purchases\n" +
@@ -188,22 +203,27 @@ class Control extends Purchase{
             case 1 :
                 System.out.println("Food");
                 showValues(type);
+                System.out.println();
                 break;
             case 2:
                 System.out.println("Clothes");
                 showValues(type);
+                System.out.println();
                 break;
             case 3:
                 System.out.println("Entertainment");
                 showValues(type);
+                System.out.println();
                 break;
             case 4:
                 System.out.println("Other");
                 showValues(type);
+                System.out.println();
                 break;
             case 5:
                 System.out.println("All");
                 showAllValues();
+                System.out.println();
                 break;
             case 6:
                 return;
@@ -234,4 +254,3 @@ class Control extends Purchase{
         System.out.println("Bye!");
     }
 }
-
