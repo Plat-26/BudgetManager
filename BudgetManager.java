@@ -1,6 +1,5 @@
 package budget;
 import  java.util.Scanner;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -8,14 +7,12 @@ import java.util.HashSet;
 
 public class Main {
     public static void main(String[] args) {
-
         chooseAction();
     }
 
 
     static void chooseAction() {
         Control control = new Control();
-//        control.populateMap();
         Scanner scanner = new Scanner(System.in);
 
         showMenu();
@@ -62,7 +59,6 @@ public class Main {
 
 }
 
-
 class Purchase {
 
     Double value;
@@ -104,10 +100,7 @@ class Purchase {
 
 class Control {
 
-//    static ArrayList<Purchase> purchases = new ArrayList<>();
-//    static double sumOfPurchases = 0.0;
     static double income = 0.0;
-
 
     Purchase nextPurchase () {
         Purchase purchase = new Purchase();
@@ -116,8 +109,6 @@ class Control {
     static Scanner scanner = new Scanner(System.in);
 
     static HashMap<Integer, HashSet<Purchase>> expenses = new HashMap<>();
-
-
 
     static void populateMap() {
         expenses.put(1, new HashSet<>()); //create map set values to null
@@ -129,7 +120,6 @@ class Control {
     void addValues(int key) {
         try {
             expenses.computeIfAbsent(key, k -> new HashSet<>()).add(nextPurchase());
-            //expenses.get(key).add(nextPurchase());
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
@@ -152,8 +142,6 @@ class Control {
         }
         System.out.println("Purchase was added\n");
         addPurchase();
-//        sumOfPurchases += p.getValue();
-//        updateIncome(p.getValue());
     }
 
     void showValues(int key) {
@@ -171,7 +159,6 @@ class Control {
 
     void showAllValues() {
         double sum = 0.0;
-        try{
             for (int i = 1; i < 5; i++) {
                 if (!expenses.get(i).isEmpty()) {
                     for (var item : expenses.get(i)) {
@@ -181,12 +168,8 @@ class Control {
                 }
                 System.out.println("Total Sum : $" + sum );
             }
-
-        } catch (Exception ex) {
-            ex.getMessage();
-        }
-
     }
+
     String purchasesToShow () {
         return "Choose the type of purchases\n" +
                 "1) Food\n" +
@@ -196,6 +179,7 @@ class Control {
                 "5) All\n" +
                 "6) Back\n";
     }
+
     void showPurchases() {
         System.out.println(purchasesToShow());
         int type = scanner.nextInt();
@@ -254,3 +238,5 @@ class Control {
         System.out.println("Bye!");
     }
 }
+
+
