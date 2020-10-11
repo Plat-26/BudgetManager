@@ -1,5 +1,11 @@
 package budget;
-import  java.util.Scanner;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.FileWriter;
+import java.util.Scanner;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -10,9 +16,9 @@ public class Main {
         chooseAction();
     }
 
-
     static void chooseAction() {
         Control control = new Control();
+//        Control.populateMap();
         Scanner scanner = new Scanner(System.in);
 
         showMenu();
@@ -40,6 +46,16 @@ public class Main {
                 System.out.println();
                 chooseAction();
                 break;
+            case 5:
+                System.out.println(control.saveToFile());
+                System.out.println();
+                chooseAction();
+                break;
+            case 6:
+                System.out.println(control.loadFromFile());
+                System.out.println();
+                chooseAction();
+                break;
             case 0:
                 control.exit();
                 break;
@@ -49,12 +65,15 @@ public class Main {
     }
 
     static void showMenu() {
-        System.out.println("Choose your action");
-        System.out.println("1) Add income");
-        System.out.println("2) Add purchase");
-        System.out.println("3) Show list of purchases");
-        System.out.println("4) Balance");
-        System.out.println("0) Exit");
+        System.out.println("Choose your action:\n" +
+                "1) Add income\n" +
+                "2) Add purchase\n" +
+                "3) Show list of purchases\n" +
+                "4) Balance\n" +
+                "5) Save\n" +
+                "6) Load\n" +
+                "0) Exit");
+
     }
 
 }
@@ -99,22 +118,15 @@ class Purchase {
 }
 
 class Control {
-
+    static Scanner scanner = new Scanner(System.in);
+    static HashMap<Integer, HashSet<Purchase>> expenses = new HashMap<>();
     static double income = 0.0;
+    static double balance = 0.0;
 
     Purchase nextPurchase () {
         Purchase purchase = new Purchase();
+        updateIncome(purchase.getValue());
         return purchase;
-    }
-    static Scanner scanner = new Scanner(System.in);
-
-    static HashMap<Integer, HashSet<Purchase>> expenses = new HashMap<>();
-
-    static void populateMap() {
-        expenses.put(1, new HashSet<>()); //create map set values to null
-        expenses.put(2, new HashSet<>());
-        expenses.put(3, new HashSet<>());
-        expenses.put(4, new HashSet<>());
     }
 
     void addValues(int key) {
@@ -123,7 +135,6 @@ class Control {
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
-
     }
 
     void addPurchase() { //get list input from console
@@ -138,7 +149,6 @@ class Control {
             default:
                 addPurchase();
                 break;
-
         }
         System.out.println("Purchase was added\n");
         addPurchase();
@@ -159,14 +169,18 @@ class Control {
 
     void showAllValues() {
         double sum = 0.0;
-            for (int i = 1; i < 5; i++) {
-                if (!expenses.get(i).isEmpty()) {
-                    for (var item : expenses.get(i)) {
-                        sum += item.getValue();
-                        System.out.println(item.getTitle() + ":" + item.getValue());
+            try {
+                for (int i = 1; i < 5; i++) {
+                    if (!expenses.get(i).isEmpty()) {
+                        for (var item : expenses.get(i)) {
+                            sum += item.getValue();
+                            System.out.println(item.getTitle() + ":" + item.getValue());
+                        }
                     }
+                    System.out.println("Total Sum : $" + sum );
                 }
-                System.out.println("Total Sum : $" + sum );
+            } catch (Exception ex){
+                System.out.println(ex.getMessage());
             }
     }
 
@@ -219,6 +233,58 @@ class Control {
         showPurchases();
     }
 
+//    static void populateMap() {
+//        expenses.put(1, new HashSet<>());
+//        expenses.put(2, new HashSet<>());
+//        expenses.put(3, new HashSet<>());
+//        expenses.put(4, new HashSet<>());
+//    }
+
+    String saveToFile() {
+        File file = new File(".\\purchases.txt");
+        double sum = 0.0;
+
+        try {
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+        } catch(IOException ex) {
+            System.out.println(ex.getMessage());
+        }
+
+        try (FileWriter writer = new FileWriter(file, true)) {
+            for (int i = 1; i < 5; i++) {
+                writer.write(i + "\n");
+                if (!expenses.get(i).isEmpty()) {
+                    for (var item : expenses.get(i)) {
+                        sum += item.getValue();
+                        writer.write(item.getTitle() + ": $" + item.getValue() + "\n");
+                    }
+                }
+            }
+            writer.write("Total Sum : $" + sum + "\n");
+//            balance = income - sum;
+            writer.write(this.getIncome()+ "\n");
+
+        } catch (IOException ex) {
+            return ex.getMessage();
+        }
+        return "Purchases were saved";
+    }
+
+    String loadFromFile() {
+        File file = new File(".\\purchases.txt");
+
+        try (Scanner scan = new Scanner(file)) {
+            while(scan.hasNext()) {
+                System.out.println(scan.nextLine());
+            }
+        } catch (FileNotFoundException ex) {
+            return ex.getMessage();
+        }
+        return "Purchases were loaded";
+    }
+
     private void updateIncome(double value) { //calculate total dollars on list
         this.income -= value;
     }
@@ -230,7 +296,7 @@ class Control {
         System.out.println("Income was added\n");
     }
 
-    String getIncome() {
+    String getIncome()  {
         return "Balance: $" + income;
     }
 
@@ -238,5 +304,4 @@ class Control {
         System.out.println("Bye!");
     }
 }
-
 
