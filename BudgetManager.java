@@ -18,7 +18,7 @@ public class Main {
 
     static void chooseAction() {
         Control control = new Control();
-//        Control.populateMap();
+//        control.populateMap();
         Scanner scanner = new Scanner(System.in);
 
         showMenu();
@@ -125,13 +125,13 @@ class Control {
 
     Purchase nextPurchase () {
         Purchase purchase = new Purchase();
-        updateIncome(purchase.getValue());
+        this.updateIncome(purchase.getValue());
         return purchase;
     }
 
     void addValues(int key) {
         try {
-            expenses.computeIfAbsent(key, k -> new HashSet<>()).add(nextPurchase());
+            expenses.computeIfAbsent(key, k -> new HashSet<>()).add(this.nextPurchase());
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
@@ -142,21 +142,21 @@ class Control {
         int type = scanner.nextInt();
         switch (type) {
             case 1: case 2: case 3: case 4:
-                addValues(type);
+                this.addValues(type);
                 break;
             case 5:
                 return;
             default:
-                addPurchase();
+                this.addPurchase();
                 break;
         }
         System.out.println("Purchase was added\n");
-        addPurchase();
+        this.addPurchase();
     }
 
     void showValues(int key) {
         double sum = 0.0;
-        if (expenses.get(key).isEmpty()) {
+        if (expenses.isEmpty()) {
             System.out.println("Purchase List is Empty");
             return;
         }
@@ -184,7 +184,7 @@ class Control {
             }
     }
 
-    String purchasesToShow () {
+    static String purchasesToShow () {
         return "Choose the type of purchases\n" +
                 "1) Food\n" +
                 "2) Clothes\n" +
@@ -226,18 +226,18 @@ class Control {
             case 6:
                 return;
             default:
-                showPurchases();
+                this.showPurchases();
                 break;
 
         }
-        showPurchases();
+        this.showPurchases();
     }
 
-//    static void populateMap() {
-//        expenses.put(1, new HashSet<>());
-//        expenses.put(2, new HashSet<>());
-//        expenses.put(3, new HashSet<>());
-//        expenses.put(4, new HashSet<>());
+//    void populateMap() {
+//        expenses.put(1, null);
+//        expenses.put(2, null);
+//        expenses.put(3, null);
+//        expenses.put(4, null);
 //    }
 
     String saveToFile() {
@@ -252,7 +252,8 @@ class Control {
             System.out.println(ex.getMessage());
         }
 
-        try (FileWriter writer = new FileWriter(file, true)) {
+        try (FileWriter writer = new FileWriter(file, false)) {
+            writer.write(this.getIncome()+ "\n");
             for (int i = 1; i < 5; i++) {
                 writer.write(i + "\n");
                 if (!expenses.get(i).isEmpty()) {
@@ -263,8 +264,6 @@ class Control {
                 }
             }
             writer.write("Total Sum : $" + sum + "\n");
-//            balance = income - sum;
-            writer.write(this.getIncome()+ "\n");
 
         } catch (IOException ex) {
             return ex.getMessage();
@@ -276,6 +275,8 @@ class Control {
         File file = new File(".\\purchases.txt");
 
         try (Scanner scan = new Scanner(file)) {
+            String s = scan.nextLine();
+            income = Double.parseDouble(s.substring(s.lastIndexOf("$" ) + 1));
             while(scan.hasNext()) {
                 System.out.println(scan.nextLine());
             }
@@ -286,13 +287,13 @@ class Control {
     }
 
     private void updateIncome(double value) { //calculate total dollars on list
-        this.income -= value;
+        income -= value;
     }
 
     void setIncome() {
         Scanner scanner = new Scanner(System.in);
         System.out.println("\nEnter Income");
-        this.income += Double.parseDouble(scanner.nextLine());
+        income += Double.parseDouble(scanner.nextLine());
         System.out.println("Income was added\n");
     }
 
