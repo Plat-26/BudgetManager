@@ -1,6 +1,4 @@
 package budget;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -11,6 +9,7 @@ import java.util.HashSet;
 
 
 
+
 public class Main {
     public static void main(String[] args) {
         chooseAction();
@@ -18,7 +17,6 @@ public class Main {
 
     static void chooseAction() {
         Control control = new Control();
-//        control.populateMap();
         Scanner scanner = new Scanner(System.in);
 
         showMenu();
@@ -117,11 +115,11 @@ class Purchase {
     }
 }
 
+
 class Control {
     static Scanner scanner = new Scanner(System.in);
     static HashMap<Integer, HashSet<Purchase>> expenses = new HashMap<>();
     static double income = 0.0;
-    static double balance = 0.0;
 
     Purchase nextPurchase () {
         Purchase purchase = new Purchase();
@@ -131,7 +129,7 @@ class Control {
 
     void addValues(int key) {
         try {
-            expenses.computeIfAbsent(key, k -> new HashSet<>()).add(this.nextPurchase());
+            this.expenses.computeIfAbsent(key, k -> new HashSet<>()).add(this.nextPurchase());
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
@@ -156,33 +154,38 @@ class Control {
 
     void showValues(int key) {
         double sum = 0.0;
-        if (expenses.isEmpty()) {
+        if (this.expenses.isEmpty()) {
             System.out.println("Purchase List is Empty");
             return;
         }
-        for (var item : expenses.get(key)) {
+
+        for (var item : this.expenses.get(key)) {
             sum += item.getValue();
-            System.out.println(item.getTitle() + ":" + item.getValue());
+            System.out.println(item.getTitle() + ": $" + item.getValue());
         }
         System.out.println("Total Sum : $" + sum );
     }
 
+
     void showAllValues() {
         double sum = 0.0;
-            try {
-                for (int i = 1; i < 5; i++) {
-                    if (!expenses.get(i).isEmpty()) {
-                        for (var item : expenses.get(i)) {
-                            sum += item.getValue();
-                            System.out.println(item.getTitle() + ":" + item.getValue());
-                        }
-                    }
-                    System.out.println("Total Sum : $" + sum );
+        try {
+            for (HashMap.Entry<Integer, HashSet<Purchase>> entry : expenses.entrySet()) {
+                System.out.println(entry.getKey());
+
+                for (Purchase purc : entry.getValue() ) {
+
+                    System.out.println(purc.getTitle() + ": $" + purc.getValue());
+                    sum += purc.getValue();
                 }
-            } catch (Exception ex){
-                System.out.println(ex.getMessage());
             }
+            System.out.println("Total Sum : $" + sum );
+
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
     }
+
 
     static String purchasesToShow () {
         return "Choose the type of purchases\n" +
@@ -200,27 +203,27 @@ class Control {
         switch (type) {
             case 1 :
                 System.out.println("Food");
-                showValues(type);
+                this.showValues(type);
                 System.out.println();
                 break;
             case 2:
                 System.out.println("Clothes");
-                showValues(type);
+                this.showValues(type);
                 System.out.println();
                 break;
             case 3:
                 System.out.println("Entertainment");
-                showValues(type);
+                this.showValues(type);
                 System.out.println();
                 break;
             case 4:
                 System.out.println("Other");
-                showValues(type);
+                this.showValues(type);
                 System.out.println();
                 break;
             case 5:
                 System.out.println("All");
-                showAllValues();
+                this.showAllValues();
                 System.out.println();
                 break;
             case 6:
@@ -233,12 +236,6 @@ class Control {
         this.showPurchases();
     }
 
-//    void populateMap() {
-//        expenses.put(1, null);
-//        expenses.put(2, null);
-//        expenses.put(3, null);
-//        expenses.put(4, null);
-//    }
 
     String saveToFile() {
         File file = new File(".\\purchases.txt");
@@ -252,18 +249,26 @@ class Control {
             System.out.println(ex.getMessage());
         }
 
+        if (this.expenses.isEmpty()) {
+            return "Expenses is empty";
+        }
+
         try (FileWriter writer = new FileWriter(file, false)) {
+
+
             writer.write(this.getIncome()+ "\n");
             for (int i = 1; i < 5; i++) {
                 writer.write(i + "\n");
-                if (!expenses.get(i).isEmpty()) {
-                    for (var item : expenses.get(i)) {
+                if (!this.expenses.get(i).isEmpty()) {
+                    for (var item : this.expenses.get(i)) {
                         sum += item.getValue();
                         writer.write(item.getTitle() + ": $" + item.getValue() + "\n");
                     }
                 }
             }
+
             writer.write("Total Sum : $" + sum + "\n");
+
 
         } catch (IOException ex) {
             return ex.getMessage();
@@ -271,38 +276,43 @@ class Control {
         return "Purchases were saved";
     }
 
+
     String loadFromFile() {
         File file = new File(".\\purchases.txt");
 
         try (Scanner scan = new Scanner(file)) {
             String s = scan.nextLine();
             income = Double.parseDouble(s.substring(s.lastIndexOf("$" ) + 1));
+            System.out.println(s);
             while(scan.hasNext()) {
                 System.out.println(scan.nextLine());
             }
+
         } catch (FileNotFoundException ex) {
             return ex.getMessage();
         }
+
         return "Purchases were loaded";
     }
 
     private void updateIncome(double value) { //calculate total dollars on list
-        income -= value;
+        this.income -= value;
     }
 
     void setIncome() {
         Scanner scanner = new Scanner(System.in);
         System.out.println("\nEnter Income");
-        income += Double.parseDouble(scanner.nextLine());
+        this.income += Double.parseDouble(scanner.nextLine());
         System.out.println("Income was added\n");
     }
 
     String getIncome()  {
-        return "Balance: $" + income;
+        return "Balance: $" + this.income;
     }
 
     void exit() {
         System.out.println("Bye!");
     }
 }
+
 
