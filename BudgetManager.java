@@ -9,7 +9,6 @@ import java.util.HashSet;
 
 
 
-
 public class Main {
     public static void main(String[] args) {
         chooseAction();
@@ -118,7 +117,7 @@ class Purchase {
 
 class Control {
     static Scanner scanner = new Scanner(System.in);
-    static HashMap<Integer, HashSet<Purchase>> expenses = new HashMap<>();
+    static HashMap<Category, HashSet<Purchase>> expenses = new HashMap<>();
     static double income = 0.0;
 
     Purchase nextPurchase () {
@@ -127,9 +126,9 @@ class Control {
         return purchase;
     }
 
-    void addValues(int key) {
+    void addValues(Category category) {
         try {
-            this.expenses.computeIfAbsent(key, k -> new HashSet<>()).add(this.nextPurchase());
+            expenses.computeIfAbsent(category, k -> new HashSet<>()).add(this.nextPurchase());
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
@@ -137,10 +136,24 @@ class Control {
 
     void addPurchase() { //get list input from console
         System.out.println(Purchase.purchasesToAdd());
+        Category cat;
         int type = scanner.nextInt();
         switch (type) {
-            case 1: case 2: case 3: case 4:
-                this.addValues(type);
+            case 1:
+                cat = Category.FOOD;
+                this.addValues(cat);
+                break;
+            case 2:
+                cat = Category.CLOTHES;
+                this.addValues(cat);
+                break;
+            case 3:
+                cat = Category.ENTERTAINMENT;
+                this.addValues(cat);
+                break;
+            case 4:
+                cat = Category.OTHER;
+                this.addValues(cat);
                 break;
             case 5:
                 return;
@@ -152,14 +165,15 @@ class Control {
         this.addPurchase();
     }
 
-    void showValues(int key) {
+    void showValues(Category category) {
         double sum = 0.0;
-        if (this.expenses.isEmpty()) {
+        if (expenses.isEmpty()) {
             System.out.println("Purchase List is Empty");
             return;
         }
 
-        for (var item : this.expenses.get(key)) {
+        System.out.println(category);
+        for (var item : expenses.get(category)) {
             sum += item.getValue();
             System.out.println(item.getTitle() + ": $" + item.getValue());
         }
@@ -170,8 +184,8 @@ class Control {
     void showAllValues() {
         double sum = 0.0;
         try {
-            for (HashMap.Entry<Integer, HashSet<Purchase>> entry : expenses.entrySet()) {
-                System.out.println(entry.getKey());
+            for (HashMap.Entry<Category, HashSet<Purchase>> entry : expenses.entrySet()) {
+                System.out.println(entry.getKey().name());
 
                 for (Purchase purc : entry.getValue() ) {
 
@@ -199,26 +213,27 @@ class Control {
 
     void showPurchases() {
         System.out.println(purchasesToShow());
+        Category cat;
         int type = scanner.nextInt();
         switch (type) {
             case 1 :
-                System.out.println("Food");
-                this.showValues(type);
+                cat = Category.FOOD;
+                this.showValues(cat);
                 System.out.println();
                 break;
             case 2:
-                System.out.println("Clothes");
-                this.showValues(type);
+                cat = Category.CLOTHES;
+                this.showValues(cat);
                 System.out.println();
                 break;
             case 3:
-                System.out.println("Entertainment");
-                this.showValues(type);
+                cat = Category.ENTERTAINMENT;
+                this.showValues(cat);
                 System.out.println();
                 break;
             case 4:
-                System.out.println("Other");
-                this.showValues(type);
+                cat = Category.OTHER;
+                this.showValues(cat);
                 System.out.println();
                 break;
             case 5:
@@ -249,26 +264,25 @@ class Control {
             System.out.println(ex.getMessage());
         }
 
-        if (this.expenses.isEmpty()) {
+        if (expenses.isEmpty()) {
             return "Expenses is empty";
         }
 
         try (FileWriter writer = new FileWriter(file, false)) {
 
-
+            // HashMap<Integer, HashSet<Purchase>> expenses2 = new HashMap<>(expenses);
             writer.write(this.getIncome()+ "\n");
-            for (int i = 1; i < 5; i++) {
-                writer.write(i + "\n");
-                if (!this.expenses.get(i).isEmpty()) {
-                    for (var item : this.expenses.get(i)) {
-                        sum += item.getValue();
-                        writer.write(item.getTitle() + ": $" + item.getValue() + "\n");
-                    }
+            for (HashMap.Entry<Category, HashSet<Purchase>> entry : expenses.entrySet()) {
+                writer.write(entry.getKey().name() + "\n");
+
+                for (Purchase purc : entry.getValue() ) {
+
+                    writer.write(purc.getTitle() + ": $" + purc.getValue() + "\n");
+                    sum += purc.getValue();
                 }
             }
 
             writer.write("Total Sum : $" + sum + "\n");
-
 
         } catch (IOException ex) {
             return ex.getMessage();
@@ -296,18 +310,18 @@ class Control {
     }
 
     private void updateIncome(double value) { //calculate total dollars on list
-        this.income -= value;
+        income -= value;
     }
 
     void setIncome() {
         Scanner scanner = new Scanner(System.in);
         System.out.println("\nEnter Income");
-        this.income += Double.parseDouble(scanner.nextLine());
+        income += Double.parseDouble(scanner.nextLine());
         System.out.println("Income was added\n");
     }
 
     String getIncome()  {
-        return "Balance: $" + this.income;
+        return "Balance: $" + income;
     }
 
     void exit() {
@@ -315,4 +329,10 @@ class Control {
     }
 }
 
+enum Category {
+    FOOD,
+    CLOTHES,
+    ENTERTAINMENT,
+    OTHER;
 
+}
