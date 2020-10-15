@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 
-
 public class Main {
     public static void main(String[] args) {
         chooseAction();
@@ -16,10 +15,8 @@ public class Main {
 
     static void chooseAction() {
         Control control = new Control();
-        Scanner scanner = new Scanner(System.in);
-
         showMenu();
-        int x = scanner.nextInt();
+        int x = Integer.parseInt(Control.validateInput("[01-6]"));
         System.out.println();
         switch (x) {
             case 1:
@@ -116,9 +113,20 @@ class Purchase {
 
 
 class Control {
-    static Scanner scanner = new Scanner(System.in);
+//    static Scanner scanner = new Scanner(System.in);
     static HashMap<Category, HashSet<Purchase>> expenses = new HashMap<>();
     static double income = 0.0;
+
+    static String validateInput(String txtForRegex) {
+        Scanner scanner = new Scanner(System.in);
+
+        String userInput = scanner.nextLine();
+        while(!userInput.matches(txtForRegex)) {
+            System.out.println("Invalid format");
+            userInput = scanner.nextLine();
+        }
+        return userInput;
+    }
 
     Purchase nextPurchase () {
         Purchase purchase = new Purchase();
@@ -137,7 +145,7 @@ class Control {
     void addPurchase() { //get list input from console
         System.out.println(Purchase.purchasesToAdd());
         Category cat;
-        int type = scanner.nextInt();
+        int type = Integer.parseInt(validateInput("[1-5]"));
         switch (type) {
             case 1:
                 cat = Category.FOOD;
@@ -214,7 +222,7 @@ class Control {
     void showPurchases() {
         System.out.println(purchasesToShow());
         Category cat;
-        int type = scanner.nextInt();
+        int type = Integer.parseInt(validateInput("[1-6]"));
         switch (type) {
             case 1 :
                 cat = Category.FOOD;
@@ -281,8 +289,8 @@ class Control {
                     sum += purc.getValue();
                 }
             }
-
             writer.write("Total Sum : $" + sum + "\n");
+
 
         } catch (IOException ex) {
             return ex.getMessage();
@@ -333,6 +341,7 @@ enum Category {
     FOOD,
     CLOTHES,
     ENTERTAINMENT,
-    OTHER;
-
+    OTHER
 }
+
+
