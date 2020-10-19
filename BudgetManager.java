@@ -129,9 +129,65 @@ class Control {
                 "4) Back\n");
     }
 
-    void Analyze(){ }
-	
-	
+    void Analyze(){ 
+	  chooseSort();
+      this.sortingMethods();
+    }
+
+    private void sortingMethods() {
+        int method = validateInput("[1-4]");
+        switch (method) {
+            case 1:
+                this.sortAllPurchases();
+                break;
+            case 2:
+                this.sortByType();
+                break;
+            case 3:
+                this.sortCertainType();
+                break;
+            case 4:
+                return;
+            default:
+                this.sortingMethods();
+                break;
+        }
+        sortingMethods();
+    }
+
+    void sortAllPurchases() {
+        ArrayList<Purchase> allPurchase = new ArrayList<>();
+
+        for (HashMap.Entry<Category, HashSet<Purchase>> entry : expenses.entrySet()) {
+            for (Purchase p : entry.getValue()) {
+                allPurchase.add(p);
+            }
+        }
+
+        sortList(allPurchase);
+    }
+
+    void sortList(ArrayList<Purchase> list) {
+        //convert arrayList to array
+
+        Purchase[] arry = list.toArray(new Purchase[0]);
+        double sum = 0.0;
+        for (int i = 0; i < arry.length - 1; i++) {
+            for (int j = 0; j < arry.length - i - 1; j++) {
+                if (arry[j].getValue() < arry[j + 1].getValue()) {
+                    Purchase temp = arry[j];
+                    arry[j] = arry[j + 1];
+                    arry[j + 1] = temp;
+                }
+            }
+        }
+
+        for (Purchase p : arry) {
+            sum += p.getValue();
+            System.out.println(p.getTitle() + " $" + p.getValue());
+        }
+        System.out.println("Total: $" + sum);
+    }
 
     static int validateInput(String txtForRegex) {
         Scanner scanner = new Scanner(System.in);
