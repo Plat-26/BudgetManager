@@ -3,9 +3,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.FileWriter;
-import java.util.Scanner;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
 
 
 public class Main {
@@ -16,7 +14,7 @@ public class Main {
     static void chooseAction() {
         Control control = new Control();
         showMenu();
-        int x = Integer.parseInt(Control.validateInput("[01-6]"));
+        int x = Control.validateInput("[01-7]");
         System.out.println();
         switch (x) {
             case 1:
@@ -50,6 +48,11 @@ public class Main {
                 System.out.println();
                 chooseAction();
                 break;
+            case 7:
+                control.Analyze();
+                System.out.println();
+                chooseAction();
+                break;
             case 0:
                 control.exit();
                 break;
@@ -66,6 +69,7 @@ public class Main {
                 "4) Balance\n" +
                 "5) Save\n" +
                 "6) Load\n" +
+                "7) Analyze\n" +
                 "0) Exit");
 
     }
@@ -113,11 +117,23 @@ class Purchase {
 
 
 class Control {
-//    static Scanner scanner = new Scanner(System.in);
+    //    static Scanner scanner = new Scanner(System.in);
     static HashMap<Category, HashSet<Purchase>> expenses = new HashMap<>();
     static double income = 0.0;
 
-    static String validateInput(String txtForRegex) {
+    static void chooseSort() {
+        System.out.println("How do you want to sort?\n" +
+                "1) Sort all purchases\n" +
+                "2) Sort by type\n" +
+                "3) Sort certain type\n" +
+                "4) Back\n");
+    }
+
+    void Analyze(){ }
+	
+	
+
+    static int validateInput(String txtForRegex) {
         Scanner scanner = new Scanner(System.in);
 
         String userInput = scanner.nextLine();
@@ -125,7 +141,7 @@ class Control {
             System.out.println("Invalid format");
             userInput = scanner.nextLine();
         }
-        return userInput;
+        return Integer.parseInt(userInput);
     }
 
     Purchase nextPurchase () {
@@ -145,7 +161,7 @@ class Control {
     void addPurchase() { //get list input from console
         System.out.println(Purchase.purchasesToAdd());
         Category cat;
-        int type = Integer.parseInt(validateInput("[1-5]"));
+        int type = validateInput("[1-5]");
         switch (type) {
             case 1:
                 cat = Category.FOOD;
@@ -222,7 +238,7 @@ class Control {
     void showPurchases() {
         System.out.println(purchasesToShow());
         Category cat;
-        int type = Integer.parseInt(validateInput("[1-6]"));
+        int type = validateInput("[1-6]");
         switch (type) {
             case 1 :
                 cat = Category.FOOD;
@@ -343,5 +359,4 @@ enum Category {
     ENTERTAINMENT,
     OTHER
 }
-
 
