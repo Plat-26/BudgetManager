@@ -121,20 +121,20 @@ class Control {
     static HashMap<Category, HashSet<Purchase>> expenses = new HashMap<>();
     static double income = 0.0;
 
-    static void chooseSort() {
-        System.out.println("How do you want to sort?\n" +
+    static String chooseSort() {
+       return "How do you want to sort?\n" +
                 "1) Sort all purchases\n" +
                 "2) Sort by type\n" +
                 "3) Sort certain type\n" +
-                "4) Back\n");
+                "4) Back\n";
     }
 
-    void Analyze(){ 
-	  chooseSort();
-      this.sortingMethods();
+    void Analyze(){
+        this.sortingMethods();
     }
 
     private void sortingMethods() {
+        System.out.println(chooseSort());
         int method = validateInput("[1-4]");
         switch (method) {
             case 1:
@@ -159,9 +159,7 @@ class Control {
         ArrayList<Purchase> allPurchase = new ArrayList<>();
 
         for (HashMap.Entry<Category, HashSet<Purchase>> entry : expenses.entrySet()) {
-            for (Purchase p : entry.getValue()) {
-                allPurchase.add(p);
-            }
+            allPurchase.addAll(entry.getValue());
         }
 
         sortList(allPurchase);
@@ -187,6 +185,75 @@ class Control {
             System.out.println(p.getTitle() + " $" + p.getValue());
         }
         System.out.println("Total: $" + sum);
+    }
+
+    void sortByType() {
+        ArrayList<String> purchaseTypes = new ArrayList<>();
+//        StringBuilder temp = new StringBuilder();
+
+        for (Category type : Category.values()) { //loop through the enum
+            double typeSum = 0;
+            if (expenses.containsKey(type)) {
+                for (Purchase p : expenses.get(type)) {
+                    typeSum += p.getValue();
+                }
+            }
+            purchaseTypes.add(type.name() + " - $" + typeSum);
+        }
+
+        this.sortList2(purchaseTypes);
+    }
+    void sortList2(ArrayList<String> list) {
+            String[] arry = list.toArray(new String[0]);
+            double sum = 0;
+            for (int i = 0; i < arry.length - 1; i++) {
+                for (int j = 0; j < arry.length - i - 1; j++) {
+                    double t1 = Double.parseDouble(arry[j].substring(arry[j].lastIndexOf("$") + 1));
+                    double t2 = Double.parseDouble(arry[j + 1].substring(arry[j].lastIndexOf("$") + 1));
+
+                    if (t1 < t2) {
+                        var temp = arry[j];
+                        arry[j] = arry[j + 1];
+                        arry[j + 1] = temp;
+                    }
+                }
+            }
+
+            for (String s : list) {
+                sum += Double.parseDouble(s.substring(s.lastIndexOf("$") + 1));
+                System.out.println(s);
+            }
+            System.out.println("Total sum: $" + sum);
+    }
+
+    void sortCertainType() {
+        System.out.println("Choose the type of purchase\n" +
+                "1) Food\n" +
+                "2) Clothes\n" +
+                "3) Entertainment\n" +
+                "4) Other"
+        );
+
+        int type = validateInput("[1-4]");
+
+        switch(type) {
+            case 1: sortType(Category.FOOD); break;
+            case 2: sortType(Category.CLOTHES); break;
+            case 3: sortType(Category.ENTERTAINMENT); break;
+            case 4: sortType(Category.OTHER); break;
+        }
+    }
+
+    void sortType(Category type) {
+        if(expenses.containsKey(type)) {
+            ArrayList<Purchase> purchaseType = new ArrayList<>();
+
+            purchaseType.addAll(expenses.get(type));
+            sortList(purchaseType);
+
+            return;
+        }
+        System.out.println("Purchase list is empty");
     }
 
     static int validateInput(String txtForRegex) {
