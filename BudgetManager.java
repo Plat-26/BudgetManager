@@ -78,7 +78,7 @@ public class Main {
 
 class Purchase {
 
-    Double value;
+    double value;
     String title;
 
     public Purchase() {
@@ -89,11 +89,16 @@ class Purchase {
         setValue(Double.parseDouble(scanner.nextLine()));
     }
 
-    public Double getValue() {
+    public Purchase(String title, double value) {
+        this.title = title;
+        this.value = value;
+    }
+
+    public double getValue() {
         return value;
     }
 
-    public void setValue(Double value) {
+    public void setValue(double value) {
         this.value = value;
     }
 
@@ -118,11 +123,11 @@ class Purchase {
 
 class Control {
     //    static Scanner scanner = new Scanner(System.in);
-    static HashMap<Category, HashSet<Purchase>> expenses = new HashMap<>();
+    private static HashMap<Category, HashSet<Purchase>> expenses = new HashMap<>();
     static double income = 0.0;
 
     static String chooseSort() {
-       return "How do you want to sort?\n" +
+        return "How do you want to sort?\n" +
                 "1) Sort all purchases\n" +
                 "2) Sort by type\n" +
                 "3) Sort certain type\n" +
@@ -139,12 +144,15 @@ class Control {
         switch (method) {
             case 1:
                 this.sortAllPurchases();
+                System.out.println();
                 break;
             case 2:
                 this.sortByType();
+                System.out.println();
                 break;
             case 3:
                 this.sortCertainType();
+                System.out.println();
                 break;
             case 4:
                 return;
@@ -188,7 +196,7 @@ class Control {
     }
 
     void sortByType() {
-        ArrayList<String> purchaseTypes = new ArrayList<>();
+        ArrayList<Purchase> purchaseTypes = new ArrayList<>();
 //        StringBuilder temp = new StringBuilder();
 
         for (Category type : Category.values()) { //loop through the enum
@@ -198,32 +206,10 @@ class Control {
                     typeSum += p.getValue();
                 }
             }
-            purchaseTypes.add(type.name() + " - $" + typeSum);
+            purchaseTypes.add(new Purchase(type.name(), typeSum));
         }
 
-        this.sortList2(purchaseTypes);
-    }
-    void sortList2(ArrayList<String> list) {
-            String[] arry = list.toArray(new String[0]);
-            double sum = 0;
-            for (int i = 0; i < arry.length - 1; i++) {
-                for (int j = 0; j < arry.length - i - 1; j++) {
-                    double t1 = Double.parseDouble(arry[j].substring(arry[j].lastIndexOf("$") + 1));
-                    double t2 = Double.parseDouble(arry[j + 1].substring(arry[j].lastIndexOf("$") + 1));
-
-                    if (t1 < t2) {
-                        var temp = arry[j];
-                        arry[j] = arry[j + 1];
-                        arry[j + 1] = temp;
-                    }
-                }
-            }
-
-            for (String s : list) {
-                sum += Double.parseDouble(s.substring(s.lastIndexOf("$") + 1));
-                System.out.println(s);
-            }
-            System.out.println("Total sum: $" + sum);
+        this.sortList(purchaseTypes);
     }
 
     void sortCertainType() {
@@ -328,10 +314,10 @@ class Control {
     }
 
 
-    void showAllValues() {
+    void showAllValues(HashMap<Category, HashSet<Purchase>> data) {
         double sum = 0.0;
         try {
-            for (HashMap.Entry<Category, HashSet<Purchase>> entry : expenses.entrySet()) {
+            for (HashMap.Entry<Category, HashSet<Purchase>> entry : data.entrySet()) {
                 System.out.println(entry.getKey().name());
 
                 for (Purchase purc : entry.getValue() ) {
@@ -385,7 +371,7 @@ class Control {
                 break;
             case 5:
                 System.out.println("All");
-                this.showAllValues();
+                this.showAllValues(Control.expenses);
                 System.out.println();
                 break;
             case 6:
