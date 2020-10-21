@@ -7,72 +7,11 @@ import java.util.*;
 
 
 public class Main {
+
     public static void main(String[] args) {
-        chooseAction();
+        new Controls().chooseAction();
     }
 
-    static void chooseAction() {
-        Control control = new Control();
-        showMenu();
-        int x = Control.validateInput("[01-7]");
-        System.out.println();
-        switch (x) {
-            case 1:
-                control.setIncome();
-                System.out.println();
-                chooseAction();
-                break;
-            case 2:
-                control.addPurchase();
-                System.out.println();
-                chooseAction();
-
-                break;
-            case 3:
-                control.showPurchases();
-                System.out.println();
-                chooseAction();
-                break;
-            case 4:
-                System.out.println(control.getIncome());
-                System.out.println();
-                chooseAction();
-                break;
-            case 5:
-                System.out.println(control.saveToFile());
-                System.out.println();
-                chooseAction();
-                break;
-            case 6:
-                System.out.println(control.loadFromFile());
-                System.out.println();
-                chooseAction();
-                break;
-            case 7:
-                control.Analyze();
-                System.out.println();
-                chooseAction();
-                break;
-            case 0:
-                control.exit();
-                break;
-            default:
-                chooseAction();
-        }
-    }
-
-    static void showMenu() {
-        System.out.println("Choose your action:\n" +
-                "1) Add income\n" +
-                "2) Add purchase\n" +
-                "3) Show list of purchases\n" +
-                "4) Balance\n" +
-                "5) Save\n" +
-                "6) Load\n" +
-                "7) Analyze\n" +
-                "0) Exit");
-
-    }
 
 }
 
@@ -120,11 +59,13 @@ class Purchase {
     }
 }
 
+class AnalyzePurchase {
 
-class Control {
-    //    static Scanner scanner = new Scanner(System.in);
-    private static HashMap<Category, HashSet<Purchase>> expenses = new HashMap<>();
-    static double income = 0.0;
+    BudgetManager control;
+
+    AnalyzePurchase(BudgetManager control) {
+        this.control = control;
+    }
 
     static String chooseSort() {
         return "How do you want to sort?\n" +
@@ -134,13 +75,13 @@ class Control {
                 "4) Back\n";
     }
 
-    void Analyze(){
+    void analyze(){
         this.sortingMethods();
     }
 
     private void sortingMethods() {
         System.out.println(chooseSort());
-        int method = validateInput("[1-4]");
+        int method = control.validateInput("[1-4]");
         switch (method) {
             case 1:
                 this.sortAllPurchases();
@@ -166,7 +107,7 @@ class Control {
     void sortAllPurchases() {
         ArrayList<Purchase> allPurchase = new ArrayList<>();
 
-        for (HashMap.Entry<Category, HashSet<Purchase>> entry : expenses.entrySet()) {
+        for (HashMap.Entry<Category, HashSet<Purchase>> entry : control.expenses.entrySet()) {
             allPurchase.addAll(entry.getValue());
         }
 
@@ -197,12 +138,11 @@ class Control {
 
     void sortByType() {
         ArrayList<Purchase> purchaseTypes = new ArrayList<>();
-//        StringBuilder temp = new StringBuilder();
 
         for (Category type : Category.values()) { //loop through the enum
             double typeSum = 0;
-            if (expenses.containsKey(type)) {
-                for (Purchase p : expenses.get(type)) {
+            if (control.expenses.containsKey(type)) {
+                for (Purchase p : control.expenses.get(type)) {
                     typeSum += p.getValue();
                 }
             }
@@ -220,7 +160,7 @@ class Control {
                 "4) Other"
         );
 
-        int type = validateInput("[1-4]");
+        int type = control.validateInput("[1-4]");
 
         switch(type) {
             case 1: sortType(Category.FOOD); break;
@@ -231,10 +171,10 @@ class Control {
     }
 
     void sortType(Category type) {
-        if(expenses.containsKey(type)) {
+        if(control.expenses.containsKey(type)) {
             ArrayList<Purchase> purchaseType = new ArrayList<>();
 
-            purchaseType.addAll(expenses.get(type));
+            purchaseType.addAll(control.expenses.get(type));
             sortList(purchaseType);
 
             return;
@@ -242,26 +182,25 @@ class Control {
         System.out.println("Purchase list is empty");
     }
 
-    static int validateInput(String txtForRegex) {
-        Scanner scanner = new Scanner(System.in);
+}
 
-        String userInput = scanner.nextLine();
-        while(!userInput.matches(txtForRegex)) {
-            System.out.println("Invalid format");
-            userInput = scanner.nextLine();
-        }
-        return Integer.parseInt(userInput);
+class Expenses {
+
+    BudgetManager manager;
+
+    public Expenses(BudgetManager manager) {
+        this.manager = manager;
     }
 
     Purchase nextPurchase () {
         Purchase purchase = new Purchase();
-        this.updateIncome(purchase.getValue());
+        manager.inc.updateIncome(purchase.getValue());
         return purchase;
     }
 
     void addValues(Category category) {
         try {
-            expenses.computeIfAbsent(category, k -> new HashSet<>()).add(this.nextPurchase());
+            manager.expenses.computeIfAbsent(category, k -> new HashSet<>()).add(this.nextPurchase());
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
@@ -270,7 +209,7 @@ class Control {
     void addPurchase() { //get list input from console
         System.out.println(Purchase.purchasesToAdd());
         Category cat;
-        int type = validateInput("[1-5]");
+        int type = manager.validateInput("[1-5]");
         switch (type) {
             case 1:
                 cat = Category.FOOD;
@@ -300,19 +239,18 @@ class Control {
 
     void showValues(Category category) {
         double sum = 0.0;
-        if (expenses.isEmpty()) {
+        if (manager.expenses.isEmpty()) {
             System.out.println("Purchase List is Empty");
             return;
         }
 
         System.out.println(category);
-        for (var item : expenses.get(category)) {
+        for (var item : manager.expenses.get(category)) {
             sum += item.getValue();
             System.out.println(item.getTitle() + ": $" + item.getValue());
         }
         System.out.println("Total Sum : $" + sum );
     }
-
 
     void showAllValues(HashMap<Category, HashSet<Purchase>> data) {
         double sum = 0.0;
@@ -333,7 +271,6 @@ class Control {
         }
     }
 
-
     static String purchasesToShow () {
         return "Choose the type of purchases\n" +
                 "1) Food\n" +
@@ -347,7 +284,7 @@ class Control {
     void showPurchases() {
         System.out.println(purchasesToShow());
         Category cat;
-        int type = validateInput("[1-6]");
+        int type = manager.validateInput("[1-6]");
         switch (type) {
             case 1 :
                 cat = Category.FOOD;
@@ -371,7 +308,7 @@ class Control {
                 break;
             case 5:
                 System.out.println("All");
-                this.showAllValues(Control.expenses);
+                this.showAllValues(manager.expenses);
                 System.out.println();
                 break;
             case 6:
@@ -383,10 +320,82 @@ class Control {
         }
         this.showPurchases();
     }
+}
 
+class Income {
+
+    double income;
+
+    public Income() {
+        this.income = 0;
+    }
+
+    void updateIncome(double value) { //calculate total dollars on list
+        income -= value;
+    }
+
+    void setIncome() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("\nEnter Income");
+        income += Double.parseDouble(scanner.nextLine());
+        System.out.println("Income was added\n");
+    }
+
+    String getIncome()  {
+        return "Balance: $" + income;
+    }
+
+}
+
+class BudgetManager {
+
+    HashMap<Category, HashSet<Purchase>> expenses = new HashMap<>();
+    Income inc;
+
+    public BudgetManager() {
+        this.inc = new Income();
+    }
+
+    int validateInput(String txtForRegex) {
+        Scanner scanner = new Scanner(System.in);
+
+        String userInput = scanner.nextLine();
+        while(!userInput.matches(txtForRegex)) {
+            System.out.println("Invalid format");
+            userInput = scanner.nextLine();
+        }
+        return Integer.parseInt(userInput);
+    }
+
+    void exit() {
+        System.out.println("Bye!");
+    }
+
+
+    static void showMenu() {
+        System.out.println("Choose your action:\n" +
+                "1) Add income\n" +
+                "2) Add purchase\n" +
+                "3) Show list of purchases\n" +
+                "4) Balance\n" +
+                "5) Save\n" +
+                "6) Load\n" +
+                "7) Analyze (sort)\n" +
+                "0) Exit");
+
+    }
+}
+
+class FileHandler {
+
+    BudgetManager manager;
+
+    FileHandler(BudgetManager manager) {
+        this.manager = manager;
+    }
 
     String saveToFile() {
-        File file = new File(".\\purchases.txt");
+        File file = new File("purchases.txt");
         double sum = 0.0;
 
         try {
@@ -397,15 +406,15 @@ class Control {
             System.out.println(ex.getMessage());
         }
 
-        if (expenses.isEmpty()) {
+        if (manager.expenses.isEmpty()) {
             return "Expenses is empty";
         }
 
         try (FileWriter writer = new FileWriter(file, false)) {
 
             // HashMap<Integer, HashSet<Purchase>> expenses2 = new HashMap<>(expenses);
-            writer.write(this.getIncome()+ "\n");
-            for (HashMap.Entry<Category, HashSet<Purchase>> entry : expenses.entrySet()) {
+            writer.write(manager.inc.getIncome()+ "\n");
+            for (HashMap.Entry<Category, HashSet<Purchase>> entry : manager.expenses.entrySet()) {
                 writer.write(entry.getKey().name() + "\n");
 
                 for (Purchase purc : entry.getValue() ) {
@@ -423,13 +432,12 @@ class Control {
         return "Purchases were saved";
     }
 
-
     String loadFromFile() {
-        File file = new File(".\\purchases.txt");
+        File file = new File("purchases.txt");
 
         try (Scanner scan = new Scanner(file)) {
             String s = scan.nextLine();
-            income = Double.parseDouble(s.substring(s.lastIndexOf("$" ) + 1));
+            manager.inc.income = Double.parseDouble(s.substring(s.lastIndexOf("$" ) + 1));
             System.out.println(s);
             while(scan.hasNext()) {
                 System.out.println(scan.nextLine());
@@ -442,23 +450,61 @@ class Control {
         return "Purchases were loaded";
     }
 
-    private void updateIncome(double value) { //calculate total dollars on list
-        income -= value;
-    }
+}
 
-    void setIncome() {
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("\nEnter Income");
-        income += Double.parseDouble(scanner.nextLine());
-        System.out.println("Income was added\n");
-    }
+class Controls {
 
-    String getIncome()  {
-        return "Balance: $" + income;
-    }
+    BudgetManager manager = new BudgetManager();
+    Expenses ex = new Expenses(manager);
+    FileHandler handler = new FileHandler(manager);
+    AnalyzePurchase analyzer = new AnalyzePurchase(manager);
 
-    void exit() {
-        System.out.println("Bye!");
+    void chooseAction() {
+        manager.showMenu();
+        int x = manager.validateInput("[01-7]");
+        System.out.println();
+        switch (x) {
+            case 1:
+                manager.inc.setIncome();
+                System.out.println();
+                chooseAction();
+                break;
+            case 2:
+                ex.addPurchase();
+                System.out.println();
+                chooseAction();
+                break;
+            case 3:
+                ex.showPurchases();
+                System.out.println();
+                chooseAction();
+                break;
+            case 4:
+                System.out.println(manager.inc.getIncome());
+                System.out.println();
+                chooseAction();
+                break;
+            case 5:
+                System.out.println(handler.saveToFile());
+                System.out.println();
+                chooseAction();
+                break;
+            case 6:
+                System.out.println(handler.loadFromFile());
+                System.out.println();
+                chooseAction();
+                break;
+            case 7:
+                analyzer.analyze();
+                System.out.println();
+                chooseAction();
+                break;
+            case 0:
+                manager.exit();
+                break;
+            default:
+                chooseAction();
+        }
     }
 }
 
