@@ -61,10 +61,10 @@ class Purchase {
 
 class AnalyzePurchase {
 
-    BudgetManager control;
+    BudgetManager manager;
 
-    AnalyzePurchase(BudgetManager control) {
-        this.control = control;
+    AnalyzePurchase(BudgetManager manager) {
+        this.manager = manager;
     }
 
     static String chooseSort() {
@@ -81,7 +81,7 @@ class AnalyzePurchase {
 
     private void sortingMethods() {
         System.out.println(chooseSort());
-        int method = control.validateInput("[1-4]");
+        int method = manager.validateInput("[1-4]");
         switch (method) {
             case 1:
                 this.sortAllPurchases();
@@ -105,9 +105,16 @@ class AnalyzePurchase {
     }
 
     void sortAllPurchases() {
+		
+		if(manager.expenses.isEmpty()) {
+			
+			System.out.println("Purchase list is empty");
+			return;
+		}
+		
         ArrayList<Purchase> allPurchase = new ArrayList<>();
 
-        for (HashMap.Entry<Category, HashSet<Purchase>> entry : control.expenses.entrySet()) {
+        for (HashMap.Entry<Category, HashSet<Purchase>> entry : manager.expenses.entrySet()) {
             allPurchase.addAll(entry.getValue());
         }
 
@@ -141,8 +148,8 @@ class AnalyzePurchase {
 
         for (Category type : Category.values()) { //loop through the enum
             double typeSum = 0;
-            if (control.expenses.containsKey(type)) {
-                for (Purchase p : control.expenses.get(type)) {
+            if (manager.expenses.containsKey(type)) {
+                for (Purchase p : manager.expenses.get(type)) {
                     typeSum += p.getValue();
                 }
             }
@@ -160,7 +167,7 @@ class AnalyzePurchase {
                 "4) Other"
         );
 
-        int type = control.validateInput("[1-4]");
+        int type = manager.validateInput("[1-4]");
 
         switch(type) {
             case 1: sortType(Category.FOOD); break;
@@ -171,7 +178,7 @@ class AnalyzePurchase {
     }
 
     void sortType(Category type) {
-        if(control.expenses.containsKey(type)) {
+        if(manager.expenses.containsKey(type)) {
             ArrayList<Purchase> purchaseType = new ArrayList<>();
 
             purchaseType.addAll(control.expenses.get(type));
